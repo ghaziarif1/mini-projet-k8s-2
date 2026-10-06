@@ -1,0 +1,20 @@
+# Secrets (JAMAIS committés)
+k8s/10-config/secret.yaml
+secret.yaml
+*.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
