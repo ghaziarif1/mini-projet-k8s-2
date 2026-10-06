@@ -23,7 +23,21 @@ spec:
               command: ["/bin/sh", "-c"]
               args:
                 - |
+                  set -e
                   FILENAME="/backup/dump-$(date +%Y%m%d-%H%M%S).sql"
+                  echo "Attente de la disponibilité de la base..."
+                  for i in $(seq 1 30); do
+                    if pg_isready -h db -p 5432 -U "$POSTGRES_USER" -q; then
+                      echo "Base prête après ${i} tentative(s)."
+                      break
+                    fi
+                    echo "  Tentative $i : base pas prête, attente 2s..."
+                    sleep 2
+                  done
+                  if ! pg_isready -h db -p 5432 -U "$POSTGRES_USER" -q; then
+                    echo "ERREUR : base injoignable après 60s"
+                    exit 1
+                  fi
                   echo "Sauvegarde vers $FILENAME"
                   pg_dump -h db -U "$POSTGRES_USER" "$POSTGRES_DB" > "$FILENAME"
                   echo "OK : $(ls -lh $FILENAME)"
