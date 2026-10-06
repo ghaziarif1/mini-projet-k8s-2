@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+  name: frontend
+  namespace: mp2-ghazi
+  labels:
+    app: taskapp
+    tier: frontend
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: taskapp
+      tier: frontend
+
+  template:
+    metadata:
+      labels:
+        app: taskapp
+        tier: frontend
+
+    spec:
+      serviceAccountName: frontend-sa
+
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+
+      volumes:
+        - name: cache
+          emptyDir: {}
+
+        - name: run
+          emptyDir: {}
+
+        - name: tmp
+          emptyDir: {}
+
+      containers:
+        - name: frontend
+          image: ghaazii/taskapp-frontend:1.0.0
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8080
+              name: http
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+
+          volumeMounts:
+            - name: cache
+              mountPath: /var/cache/nginx
+
+            - name: run
+              mountPath: /var/run
+
+            - name: tmp
+              mountPath: /tmp
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 3
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 15
+
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+
+            limits:
+              cpu: 200m
+              memory: 128Mi

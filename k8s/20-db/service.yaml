@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: mp2-ghazi
+  labels:
+    app: taskapp
+    tier: db
+spec:
+  clusterIP: None   # Headless Service
+  selector:
+    app: taskapp
+    tier: db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
